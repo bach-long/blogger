@@ -41,6 +41,9 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/user/edit', [UserController::class, 'editProfile']);
     Route::post('/article/edit', [ArticleController::class, 'editArticle']);
+    Route::post('/upload', [UploadController::class, 'handleUpload']);
+    Route::post('/comment', [UserController::class, 'comment']);
+    Route::post('/comment/edit', [UserController::class, 'editComment']);
 });
 
 Route::get('/article/all', [ArticleController::class, 'getAll']);
@@ -55,7 +58,6 @@ Route::post('/search', [SearchController::class, 'search']);
 
 Route::get('/category/all', [CategoryController::class, 'getAll']);
 
-Route::post('/upload', [UploadController::class, 'handleUpload']);
 Route::get('/test-recursive', function() {
     dump(Category::find(1)->articles()->paginate(10));
 });

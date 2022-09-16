@@ -63,7 +63,7 @@ class User extends Authenticatable
     }
     public function comments()
     {
-        return $this->belongsToMany(Article::class, 'comment', 'user_id', 'article_id')->using(Comment::class)->withPivot('content', 'parent_id')->withTimestamps();
+        return $this->belongsToMany(Article::class, 'comment', 'user_id', 'article_id')->using(Comment::class)->withPivot('id', 'content', 'parent_id', 'reply_id')->withTimestamps();
     }
     public function view()
     {

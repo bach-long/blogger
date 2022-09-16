@@ -27,7 +27,7 @@ class CategoryController extends Controller
     public function getArticlesByCategoryId($categoryId) {
         try{
             $category = Category::find($categoryId);
-            $articles = $category->articles()->paginate(5);
+            $articles = $category->articles()->paginate(6);
             if($articles) {
                 foreach($articles as $article) {
                     $article->comments;

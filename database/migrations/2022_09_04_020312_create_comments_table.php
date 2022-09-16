@@ -19,6 +19,7 @@ return new class extends Migration
             $table->bigInteger('article_id');
             $table->text('content');
             $table->bigInteger('parent_id')->nullable();
+            $table->bigInteger('reply_id')->nullable();
             $table->timestamps();
         });
 

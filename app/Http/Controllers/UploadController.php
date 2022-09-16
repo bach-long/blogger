@@ -22,13 +22,13 @@ class UploadController extends Controller
             if ($request->hasFile('images')) {
                 $name = [];
                 foreach ($request->file('images') as $image) {
-                    $imageName = $image->getClientOriginalName();
+                    $imageName = time().$request->user()->id.$image->getClientOriginalName();
                     $image->move(public_path('images/'), $imageName);
-                    array_push($name, asset('images/'.$imageName));
-                    Image::create([
+                    $imageCreated =  Image::create([
                         'img_link' => asset('images/'.$imageName),
-                        'user_id' =>  $request->userId,
+                        'user_id' =>  $request->user()->id,
                     ]);
+                    array_push($name, $imageCreated);
                 }
                 return response()->json([
                     'data' => $name
@@ -44,5 +44,26 @@ class UploadController extends Controller
             ]);
         }
         
+    }
+
+    public function deleteImage(Request $request) {
+        try {
+            if ($request->has('deleted')) {
+                foreach ($request->deleted as $file) {
+                    $data = json_decode($file);
+                    if($data->name !== 'blank-avatar.jpg'){ 
+                        if (File::exists(public_path('images/'.$data->name))) {
+                            File::delete(public_path('images/'.$data->name));
+                        }
+                    }
+                }
+            }
+            Image::find($request->id)->delete();
+        } catch (Exception $err) {
+            return response([
+                'success' => false,
+                'message' => $err->getMessage(),
+            ]);
+        }
     }
 }

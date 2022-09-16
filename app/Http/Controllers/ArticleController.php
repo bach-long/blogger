@@ -14,7 +14,7 @@ class ArticleController extends Controller
     //
     public function getAll(Request $request) {
         try {
-            $articles=Article::paginate(5);
+            $articles=Article::paginate(6);
             foreach($articles as $article) {
                 if($request->user()) {
                     dd($request->user());
@@ -83,7 +83,7 @@ class ArticleController extends Controller
                             $isLiked =  $article->likes()->where('user_id', $user->id)->first()->pivot->value;
                         } 
                         $isBookmarked = $article->bookmark()->where('user_id', $user->id)->exists();
-                        $authorFollowed = $user->following()->where('following_id', $article->id)->exists();
+                        $authorFollowed = $user->following()->where('following_id', $article->author->id)->exists();
                     }
                 }
                 $article->view_count++;
@@ -180,7 +180,7 @@ class ArticleController extends Controller
         try {
             $thumbnail = '';
             foreach ($request->file('images') as $image) {
-                $imageName = $image->getClientOriginalName();
+                $imageName = time().$request->user()->id.$image->getClientOriginalName();
                 $image->move(public_path('images/'), $imageName);
                 $thumbnail =  asset('images/'.$imageName);
             }
@@ -215,7 +215,7 @@ class ArticleController extends Controller
             $article = Article::find($request->articleId);
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
-                    $imageName = $image->getClientOriginalName();
+                    $imageName = time().$request->user()->id.$image->getClientOriginalName();
                     $image->move(public_path('images/'), $imageName);
                     $thumbnail =  asset('images/'.$imageName);
                     $article->thumbnail = $thumbnail;
@@ -264,7 +264,7 @@ class ArticleController extends Controller
         $comments = [];
         try {
             $article = Article::find($articleId);
-            foreach($article->comments as $user) {
+            foreach($article->comments()->orderBy('updated_at')->get() as $user) {
                 if($user->pivot->parent_id == null) {
                     $user->pivot->user;
                     $user->pivot->childs;

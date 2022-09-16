@@ -38,7 +38,7 @@ class Article extends Model
     }
     public function comments()
     {
-        return $this->belongsToMany(User::class, 'comment', 'article_id', 'user_id')->using(Comment::class)->withPivot('id', 'content', 'parent_id')->withTimestamps();
+        return $this->belongsToMany(User::class, 'comment', 'article_id', 'user_id')->using(Comment::class)->withPivot('id', 'content', 'parent_id', 'reply_id')->withTimestamps();
     }
     public function thumbnail()
     {

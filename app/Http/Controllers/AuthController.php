@@ -14,7 +14,7 @@ class AuthController extends Controller
         $avatar = 'http://127.0.0.1:8000/images/blank-avatar.jpg';
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $imageName = $image->getClientOriginalName();
+                $imageName = time().rand(1,100).$image->getClientOriginalName();
                 $image->move(public_path('images/'), $imageName);
                 $avatar =  asset('images/'.$imageName);
             }

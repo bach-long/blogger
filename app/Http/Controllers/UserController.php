@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Comment;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -14,7 +15,7 @@ class UserController extends Controller
     //
     public function getArticles($userId) {
         try {
-            $articles = User::find($userId)->articles()->with('comments', 'author', 'view', 'bookmark')->paginate(5);
+            $articles = User::find($userId)->articles()->with('comments', 'author', 'view', 'bookmark')->paginate(6);
             if($articles) {
                 return response()->json([
                     'data' => $articles,
@@ -38,7 +39,7 @@ class UserController extends Controller
         try {
             $user = User::find($id);
             if($user) {
-                $articles = $user->bookmark()->paginate(5);
+                $articles = $user->bookmark()->paginate(6);
                 foreach($articles as $article) {
                     $article->comments;
                     $article->author;
@@ -71,6 +72,7 @@ class UserController extends Controller
                 $user->view;
                 $user->following;
                 $user->followers;
+                $user->images;
                 return response()->json([
                     'data' => $user,
                     'message' => 'success'
@@ -90,19 +92,19 @@ class UserController extends Controller
     }
 
     public function statistic($id) {
-        $dataCreate = [];
-        $dataRead = [];
+        $dataCreate = null;
+        $dataRead = null;
         try {
             $user = User::find($id);
             $categories = Category::all();
             foreach($categories as $category) {
                 $count = $category->articles()->where('user_id', $id)->count();
-                array_push($dataCreate, ['name' => $category->name, 'count' => $count]);
+                $dataCreate[$category->name] = $count;
             }
             $readData = $user->view->groupBy('category_id');
             foreach( $readData as $key) {
                 $count = count($key);
-                array_push($dataRead, ['name'=>$key[0]->category->name, 'count'=>$count]);
+                $dataRead[$key[0]->category->name] = $count;
             }
             return response()->json([
                 'data' => ['create' => $dataCreate, 'read' => $dataRead],
@@ -220,6 +222,47 @@ class UserController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $err->getMessage()
+            ]);
+        }
+    }
+
+    public function comment(Request $request) {
+        try {
+            $user = $request->user();
+            $comment = Comment::create([
+                'user_id'=>$user->id,
+                'article_id'=>$request->articleId,
+                'content'=>$request->content,
+                'parent_id'=>$request->has('parentId') ? $request->parentId : null , 
+                'reply_id' => $request->has('replyId') ? $request->replyId : null]);
+                $comment->user;
+                $comment->childs;
+            return response()->json([
+                'data' => $comment,
+                'message'=> 'commented'
+            ]);
+        } catch (Exception $err) {
+            return response()->json([
+                'success' => false,
+                'message' => $err->getMessage()
+            ]);
+        }
+
+    }
+
+    public function editComment(Request $request) {
+        $comment = Comment::find($request->id);
+        if($comment) {
+            $comment->content = $request->content;
+            $comment->save();
+            return response()->json([
+                'success' => true,
+                'message' => 'edited'
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'error'
             ]);
         }
     }

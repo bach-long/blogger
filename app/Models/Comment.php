@@ -16,7 +16,8 @@ class Comment extends Pivot
         'user_id',
         'article_id',
         'content',
-        'parent_id'
+        'parent_id',
+        'reply_id',
     ];
 
     public function childs()
@@ -38,6 +39,10 @@ class Comment extends Pivot
        return $this->belongsTo(User::class, 'user_id', 'id');
     }
     
+    public function replyTo() {
+        return $this->belongsTo(User::class, 'reply_id', 'id');
+    }
+
     public function allChildComments() {
         $childComments = [];
         $comments = [$this];
