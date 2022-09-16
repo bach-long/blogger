@@ -46,7 +46,7 @@ const CategoryArticles = () => {
               No articles for this category
             </span>
           </div>}
-        {total > 5 &&  <Paginate page={page} total={total} onChange={handleChangePage}/>}
+        {total > 6 &&  <Paginate page={page} total={total} onChange={handleChangePage}/>}
         </MainLayout>
     </Layout>
   )

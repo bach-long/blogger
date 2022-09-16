@@ -5,8 +5,9 @@ import { PostDetail } from '../components'
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom'
-import { getById, getByIdWithAuth, getComments, getRelated } from '../api/articleApi';
+import { getById, getComments, getRelated } from '../api/articleApi';
 import FeaturedPostList from '../sections/FeaturedPostList';
+import { Spin } from 'antd';
 
 const Detail = () => {
   const params = useParams();
@@ -29,7 +30,9 @@ const Detail = () => {
   return (
     <Layout>
       <MainLayout>
-        <PostDetail article={article} comments={comments}/>
+        {article && relatedArticles && comments ?
+        <PostDetail article={article} comments={comments}/> :
+        <div className='flex justify-center'><Spin size='large' tip="Almost done ..."/></div>}
       </MainLayout>
       <FeaturedPostList list={relatedArticles} related={article?.category?.id} />
     </Layout>

@@ -117,13 +117,11 @@ const FormCreate = ({articleId, userId}) => {
         data.append('images[]', file)
     });
 
-    data.append('user_id', 1);
-
     let res = await upload(data);
     console.log(res);
     let images = ''
     res.data.forEach((i) => {
-      images += `![image](${i})\n`
+      images += `![image](${i.img_link})\n`
     })
     setValue(value + '\n' + images);
   }
@@ -162,6 +160,7 @@ const FormCreate = ({articleId, userId}) => {
       }
       let res = await editArticle(data);
       console.log(res); 
+      navigate(`/detail/${articleId}}`);
     } else {
       console.log('fill all neccessary fields');
     }
@@ -173,7 +172,6 @@ const FormCreate = ({articleId, userId}) => {
         <div className='mb-10 cursor-pointer hover:bg-teal-400 inline-block rounded p-1'>
           <ArrowLeftOutlined style={{fontSize: '2rem', color: 'white'}} onClick={() => navigate(-1)}/>
         </div>
-      {value && categoryId && title && thumbnail ?
       <div className='bg-white shadow-lg flex justify-center rounded-lg p-0 lg:p-8 pb-12 mb-8'>
           <div className='w-full'>
             <div className='mb-2 inline-block'>
@@ -188,7 +186,6 @@ const FormCreate = ({articleId, userId}) => {
                 onPreview={handlePreview}
                 onChange={handleChange}
                 beforeUpload={beforeUpload}
-                //action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
                 accept="image/png, image/jpg, image/jpeg"
                 onRemove={handleRemove}
                >
@@ -291,10 +288,7 @@ const FormCreate = ({articleId, userId}) => {
               <button className="p-1 shadow-sm rounded bg-teal-400 hover:bg-teal-300 text-white" onClick={articleId && userId ? handleEdit : handleCreate }>Submit</button>
             </div>
           </div>
-      </div> : 
-      <div className='flex justify-center'>
-          <Spin size='large' className='flex justify-center' tip="Almost done ..."/>
-      </div>}
+      </div>
       </div>
     )
   } else {

@@ -18,3 +18,5 @@ export {default as Follow} from './Buttons/Follow';
 export {default as CommentForm} from './CommentForm';
 export {default as Comments} from './Comments';
 export {default as Search} from './Search';
+export {default as PeopleList} from './PeopleList';
+export {default as Images} from './Images';

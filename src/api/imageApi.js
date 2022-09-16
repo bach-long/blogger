@@ -6,6 +6,7 @@ export const upload = async (request) => {
             headers: {'Authorization': `Bearer ${localStorage.getItem('token')}`},
             body: request
         }).json();
+        console.log(res);
         return res;
     } catch (error) {
         return {

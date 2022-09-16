@@ -9,6 +9,8 @@ import Paginate from './Paginate';
 import Postcard from './Postcard';
 import Chart from './Chart';
 import { useParams, useNavigate } from 'react-router-dom';
+import PeopleList from './PeopleList';
+import Images from './Images';
 
 const UserDetail = () => {
   const [articles, setArticles] = useState();
@@ -59,6 +61,8 @@ const UserDetail = () => {
         setBookmarkPage(page)
     }
   }
+
+  console.log(info);
 
   return (
     <div className='container mx-auto bx-10 mb-8'>
@@ -119,7 +123,7 @@ const UserDetail = () => {
                           {articles.map((article)=>(
                             <Postcard article={article} key={article.id}/>
                           ))}
-                          {articleTotal > 5 && <Paginate page={articlePage} total={articleTotal} onChange={handleChangeArticlePage}/>}
+                          {articleTotal > 6 && <Paginate page={articlePage} total={articleTotal} onChange={handleChangeArticlePage}/>}
                         </div>
                       )
                     } else if (item =='bookmark') {
@@ -128,7 +132,7 @@ const UserDetail = () => {
                           {bookmark.map((article)=>(
                             <Postcard article={article} key={article.id}/>
                           ))}
-                          {bookmarkTotal > 5 && <Paginate page={bookmarkPage} total={bookmarkTotal} onChange={handleChangeBookmarkPage}/>}
+                          {bookmarkTotal > 6 && <Paginate page={bookmarkPage} total={bookmarkTotal} onChange={handleChangeBookmarkPage}/>}
                         </div>
                       )
                     } else if (item == 'statistic') {
@@ -138,7 +142,17 @@ const UserDetail = () => {
                         <Chart data={statistic.read} read={true}/>
                       </div>
                       )
-                    }
+                    } else if (item == 'following'){
+                      return(
+                        <PeopleList list={info?.following} userId={info.id}/>
+                      )
+                    } else if (item == 'followed'){
+                      return(
+                        <PeopleList list={info?.followers} userId={info.id}/>
+                      )
+                    } else {
+                      return <Images list={info?.images}/>
+                    } 
                   } else {
                     return (
                       <div className='flex justify-center'>

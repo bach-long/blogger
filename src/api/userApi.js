@@ -43,6 +43,7 @@ export const getBookmark = async (userId, page) => {
 export const getStatistic = async (userId) => {
     try {
         const res = await ky.get(`http://127.0.0.1:8000/api/user/${userId}/statistic`).json();
+        console.log(res);
         return res;
     } catch (error) {
         return {
@@ -74,6 +75,7 @@ export const followHandle = async (userId, followingId) => {
             headers: {'Authorization': `Bearer ${localStorage.getItem('token')}`},
             json: {'userId' : userId, 'followingId': followingId}
         }).json();
+        console.log(res);
         return res;
     } catch (error) {
         return {
@@ -134,6 +136,38 @@ export const editProfile = async (request) => {
         {'Authorization': `Bearer ${localStorage.getItem('token')}`}, 
         body: request
         }).json();
+        return res;
+    } catch (error) {
+        return {
+            success: false,
+            message: error.message
+        }
+    }
+}
+
+export const createComment = async (articleId, content, parentId, replyId) => {
+    try {
+        const res = await ky.post(`http://127.0.0.1:8000/api/comment`,{headers: 
+        {'Authorization': `Bearer ${localStorage.getItem('token')}`}, 
+        json: {'articleId': articleId, 'parentId': parentId, 'replyId' : replyId, 'content': content }
+        }).json();
+        console.log(res)
+        return res;
+    } catch (error) {
+        return {
+            success: false,
+            message: error.message
+        }
+    }
+}
+
+export const editComment = async (commentId, content) => {
+    try {
+        const res = await ky.post(`http://127.0.0.1:8000/api/comment/edit`,{headers: 
+        {'Authorization': `Bearer ${localStorage.getItem('token')}`}, 
+        json: {'id': commentId, 'content': content}
+        }).json();
+        console.log(res)
         return res;
     } catch (error) {
         return {

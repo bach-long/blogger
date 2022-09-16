@@ -34,7 +34,7 @@ const Home = () => {
     <Layout>
       <MainLayout>
           {list.map((element)=>(<Postcard article={element} key={element.id}/>))}
-          {total > 5 &&  <Paginate page={page} total={total} onChange={handleChangePage}/>}
+          {total > 6 &&  <Paginate page={page} total={total} onChange={handleChangePage}/>}
       </MainLayout>
     </Layout>
   )

@@ -8,7 +8,7 @@ const Paginate= ({page, total, onChange}) => {
         page={page}
         total={total}
         onChange={onChange}
-        pageSize={5}
+        pageSize={6}
         showSizeChanger={false}
         showQuickJumper={true}
       />

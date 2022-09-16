@@ -11,6 +11,7 @@ import {
 } from 'antd';
 import moment from 'moment';
 import { editProfile } from '../api/userApi';
+import { LayoutContext } from '../context/LayoutProvider';
 
 const Info = ({info}) => {
   const [previewVisible, setPreviewVisible] = useState(false)
@@ -24,6 +25,8 @@ const Info = ({info}) => {
     state: 'done',
     inDb: true
   }]);
+
+  const {mainUser} = React.useContext(LayoutContext);
 
   useEffect(()=>{
     const data = {};
@@ -134,6 +137,7 @@ const Info = ({info}) => {
   return (
     <div className='w-full ml-10'>
         <Form
+            disabled={mainUser.id === info.id ? false : true}
             labelCol={{
               span: 4,
             }}
@@ -189,7 +193,8 @@ const Info = ({info}) => {
                   <Input />
             </Form.Item>
             <Form.Item className='mt-4'>
-            <button className="ml-72 px-4 py-2 font-semibold text-sm bg-teal-400 text-white rounded shadow-sm font-semibold" onClick={handleEdit}>Save</button>
+            {mainUser.id === info.id &&
+            <button className="ml-72 px-4 py-2 font-semibold text-sm bg-teal-400 text-white rounded shadow-sm font-semibold" onClick={handleEdit}>Save</button>}
             </Form.Item>
         </Form>
     </div>

@@ -9,7 +9,6 @@ import { LayoutContext } from '../context/LayoutProvider';
 import Bookmark from './Buttons/Bookmark';
 import Comments from './Comments';
 import { memo } from 'react';
-import { Spin } from 'antd';
 import moment from 'moment';
 import { reactHandle } from '../api/userApi';
 
@@ -19,38 +18,37 @@ const PostDetail = ({article, comments}) => {
   const [dislikeCount, setdislikeCount] = useState(article?.dislikeCount);
   const {mainUser} = React.useContext(LayoutContext);
   const navigate = useNavigate();
-
+  console.log(article)
   const handleLike = async () => {
     if(like === 1) {
       let react = await reactHandle(article?.data?.id, -1);
+      setLike(-1)
       setLikeCount(react.data.likeCount);
       setdislikeCount(react.data.dislikeCount);
-      setLike(-1)
     } else {
       let react = await reactHandle(article?.data?.id, 1);
+      setLike(1);
       setLikeCount(react.data.likeCount);
       setdislikeCount(react.data.dislikeCount);
-      setLike(1);
     }
   }
 
   const handleDislike = async () => {
     if(like === 0) {
       let react = await reactHandle(article?.data?.id, -1);
+      setLike(-1)
       setLikeCount(react.data.likeCount);
       setdislikeCount(react.data.dislikeCount);
-      setLike(-1)
     } else {
+      setLike(0);
       let react = await reactHandle(article?.data?.id, 0);
       setLikeCount(react.data.likeCount);
       setdislikeCount(react.data.dislikeCount);
-      setLike(0)
     }
   }
 
   return (
     <div>
-    {article? 
     <div className="bg-white shadow-lg rounded-lg lg:p-8 pb-12 mb-8">
         <div className='mb-5 cursor-pointer hover:bg-teal-400 inline-block rounded p-1'>
           <ArrowLeftOutlined style={{fontSize: '2rem', color: 'black'}} onClick={() => navigate(-1)}/>
@@ -83,21 +81,21 @@ const PostDetail = ({article, comments}) => {
               <div className='flex justify-end ml-72'>
                 {/*<Like count={likeCount} value={like} setLike={setLike} userId={mainUser.id} articleId={article?.data?.title}/>*/}
                 <div className='flex items-center text-2xl ml-4'>
-                {like === 1 || (article?.isLike === 1 && !like) ?
+                {like === 1  ?
                   <LikeFilled style={{fontSize: '2rem'}} onClick={handleLike}/> :
                   <LikeOutlined style={{fontSize: '2rem'}} onClick={handleLike}/> 
                 }
-                <span className='ml-2'>{article?.likeCount}</span>
+                <span className='ml-2'>{likeCount}</span>
                 </div>     
               </div>}
               {localStorage.getItem('token') && 
               <div className='flex justify-end ml-2'>
                 {/*<Dislike count={dislikeCount} value={like} setLike={setLike} userId={mainUser.id} articleId={article?.data?.title}/>*/}
                 <div className='flex items-center text-2xl ml-4'> 
-                {like === 0 || (article?.isLike === 0 && !like) ?
+                {like === 0  ?
                   <DislikeFilled style={{fontSize: '2rem'}} onClick={handleDislike}/> :
                   <DislikeOutlined style={{fontSize: '2rem'}} onClick={handleDislike}/> }
-                  <span className='ml-2'>{article?.dislikeCount}</span>
+                  <span className='ml-2'>{dislikeCount}</span>
                 </div> 
               </div>}
               {localStorage.getItem('token') && 
@@ -146,7 +144,7 @@ const PostDetail = ({article, comments}) => {
            }} 
           />
         </div>
-      </div> : <div className='flex justify-center'><Spin size='large' tip="Almost done ..."/></div>}
+      </div>
       {localStorage.getItem('token') ?  
         <div>
           <CommentForm/>
