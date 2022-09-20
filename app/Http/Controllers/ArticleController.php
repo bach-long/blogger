@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Comment;
 use Exception;
 use Laravel\Sanctum\PersonalAccessToken;
 use Illuminate\Support\Facades\File;
@@ -263,19 +264,17 @@ class ArticleController extends Controller
     public function getComments($articleId) {
         $comments = [];
         try {
-            $article = Article::find($articleId);
-            foreach($article->comments()->orderBy('updated_at')->get() as $user) {
-                if($user->pivot->parent_id == null) {
-                    $user->pivot->user;
-                    $user->pivot->childs;
-                    foreach($user->pivot->childs as $child) {
+            $data = Comment::where('parent_id', null)->where('article_id', $articleId)->orderBy('updated_at', 'DESC')->get();
+            foreach($data as $comment) {
+                    $comment->user;
+                    $comment->childs;
+                    foreach($comment->childs as $child) {
                         $this->getChilds($child);
                     }
-                    array_push($comments, $user->pivot);
-                }
+                    array_push($comments, $comment);
             }
             return response()->json([
-                'data' => [ 'data' => $comments, 'total' => $article->comments()->count()],
+                'data' => [ 'data' => $comments, 'total' => $data->count()],
                 'message' => 'success',
             ], 200);
         } catch (Exception $err) {

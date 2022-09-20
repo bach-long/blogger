@@ -5,21 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\Image;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
     //
 
     public function signup(Request $request) {
-        $avatar = 'http://127.0.0.1:8000/images/blank-avatar.jpg';
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $imageName = time().rand(1,100).$image->getClientOriginalName();
-                $image->move(public_path('images/'), $imageName);
-                $avatar =  asset('images/'.$imageName);
+        $avatar = 'http://127.0.0.1:8000/images/blank-avatar.jpg'; 
+        if (!User::where(DB::raw('BINARY `username`'), $request->username)->orWhere(DB::raw('BINARY `email`'), $request->email)->exists()) {
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $imageName = time().rand(1,100).$image->getClientOriginalName();
+                    $image->move(public_path('images/'), $imageName);
+                    $avatar =  asset('images/'.$imageName);
+                }
             }
-        } 
-        if (!User::where('username', $request->username)->orWhere('email', $request->email)->exists()) {
             $user = new User();
             $user->avatar = $avatar;
             $user->username = $request->username;

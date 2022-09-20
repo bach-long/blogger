@@ -9,6 +9,7 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class UserController extends Controller
 {
@@ -65,17 +66,23 @@ class UserController extends Controller
         }
     }
     
-    public function getInfo($id) {
+    public function getInfo($id, Request $request) {
         try {
             $user = User::find($id);
+            $isFollowing = false;
+            if($request->header('authorization') && $request->header('authorization') !== 'Bearer null') {
+                $mainUser = PersonalAccessToken::findToken(substr($request->header('authorization'),7))->tokenable;
+                $isFollowing = $mainUser->following()->where('following_id', $user->id)->exists();
+            }
             if($user) {
                 $user->view;
                 $user->following;
                 $user->followers;
-                $user->images;
+                $user->images = $user->images()->orderBy('created_at', 'DESC')->get();
+                $user->isFollowing = $isFollowing;
                 return response()->json([
                     'data' => $user,
-                    'message' => 'success'
+                    'message' => 'success',
                 ], 200);
             } else {
                 return response()->json([
@@ -265,6 +272,12 @@ class UserController extends Controller
                 'message' => 'error'
             ]);
         }
+    }
+
+    public function getAllNotifications(Request $request) {
+        $user = $request->user();
+        $data = $user->receives;
+        return $data; 
     }
 
 }

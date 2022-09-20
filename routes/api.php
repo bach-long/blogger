@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UploadController;
@@ -44,6 +45,9 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::post('/upload', [UploadController::class, 'handleUpload']);
     Route::post('/comment', [UserController::class, 'comment']);
     Route::post('/comment/edit', [UserController::class, 'editComment']);
+    Route::post('/image/delete', [UploadController::class, 'deleteImage']);
+    Route::post('/notification/send', [NotificationController::class, 'notify']);
+    Route::get('/notification/all', [UserController::class, 'getAllNotifications']);
 });
 
 Route::get('/article/all', [ArticleController::class, 'getAll']);

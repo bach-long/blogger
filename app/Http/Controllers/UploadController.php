@@ -48,17 +48,16 @@ class UploadController extends Controller
 
     public function deleteImage(Request $request) {
         try {
-            if ($request->has('deleted')) {
-                foreach ($request->deleted as $file) {
-                    $data = json_decode($file);
-                    if($data->name !== 'blank-avatar.jpg'){ 
-                        if (File::exists(public_path('images/'.$data->name))) {
-                            File::delete(public_path('images/'.$data->name));
-                        }
-                    }
+            Image::find($request->id)->delete();
+            if($request->name != 'blank-avatar.jpg') {
+                if (File::exists(public_path('images/'.$request->name))) {
+                    File::delete(public_path('images/'.$request->name));
                 }
             }
-            Image::find($request->id)->delete();
+            return response()->json([
+                'data' => public_path(),
+                'message' => 'image deleted'
+            ]);
         } catch (Exception $err) {
             return response([
                 'success' => false,

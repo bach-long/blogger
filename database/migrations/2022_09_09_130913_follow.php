@@ -15,7 +15,7 @@ return new class extends Migration
     {
         //
         Schema::create('follow', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
             $table->bigInteger('follower_id');
             $table->bigInteger('following_id');
             $table->timestamps();
