@@ -6,7 +6,6 @@ export const search = async (searchValue) => {
             headers: {'Authorization': `Bearer ${localStorage.getItem('token')}`},
             json: {'searchValue': searchValue}
         }).json();
-        console.log(res)
         return res;
     } catch (error) {
         return {

@@ -16,7 +16,10 @@ export const getArticlesOfUser = async (userId, page) => {
 
 export const getInfo = async (userId) => {
     try {
-        const res = await ky.get(`http://127.0.0.1:8000/api/user/${userId}/info`).json();
+        const res = await ky.get(`http://127.0.0.1:8000/api/user/${userId}/info`,{
+            headers: {'Authorization': `Bearer ${localStorage.getItem('token')}`}
+        }).json();
+        console.log(res);
         return res;
     } catch (error) {
         return {
@@ -43,7 +46,6 @@ export const getBookmark = async (userId, page) => {
 export const getStatistic = async (userId) => {
     try {
         const res = await ky.get(`http://127.0.0.1:8000/api/user/${userId}/statistic`).json();
-        console.log(res);
         return res;
     } catch (error) {
         return {

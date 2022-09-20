@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { createComment, editComment } from '../api/userApi';
 import { LayoutContext } from '../context/LayoutProvider';
 import { DownOutlined } from '@ant-design/icons';
+import CommentForm from './CommentForm';
 
 const Comment = ({comment, parentId}) => {
     const [value, setValue] = useState('');
@@ -14,7 +15,6 @@ const Comment = ({comment, parentId}) => {
     const [show, setShow] = useState(false);
     const handleSubmit = async (articleId, content, parentId, replyId) => {
       let res = await createComment(articleId, content, parentId, replyId);
-      console.log(res.data);
       return res.data;
     }
     const handleEdit = async (commentId, content) => {
@@ -92,7 +92,7 @@ const Comment = ({comment, parentId}) => {
                   </div>}
                   {childs.length > 0 &&
                         <div className='flex justify-start'><button className='text-sm font-bold hover:text-teal-400 cursor-pointer' 
-                        onClick={()=>{setShow((prev)=>(!prev))}}><DownOutlined/></button></div>
+                        onClick={()=>{setShow((prev)=>(!prev)); setOut(false);}}><DownOutlined/></button></div>
                   }
                   {out && !edit &&
                   <div>
@@ -107,10 +107,11 @@ const Comment = ({comment, parentId}) => {
                         </button>
                       </div>
                       <div className='mx-2' onClick={async ()=>{
-                        let tempt = await handleSubmit(comment?.article_id, value, comment.id, comment.id);
-                        console.log(tempt);
+                        let tempt = await handleSubmit(comment.article_id, value, comment.id, comment.id);
+
                         setChilds((prev)=>[...prev, tempt]);
                         setOut(false);
+                        setShow(true)
                         }}>
                         <button className='text-black hover:text-teal-400 cursor-pointer'>
                           Submit
@@ -124,17 +125,20 @@ const Comment = ({comment, parentId}) => {
     );
 }
 
-const Comments = ({comments}) => {
+const Comments = ({comments, article}) => {
+     const [Comments, setComments] = useState(comments.data);
+     const [total, setTotal] = useState(comments.total);
      return (
     <>
-      {comments.total > 0 && (
+      <CommentForm articleId={article.data.id} setComments={setComments} setTotal={setTotal} comments={Comments}/>
+      {total > 0 && (
         <div className="bg-white shadow-lg rounded-lg p-8 pb-12 mb-8">
           <h3 className="text-xl mb-8 font-semibold border-b pb-4">
             {comments.total}
             {' '}
             Comments
           </h3>
-            {comments.data.map((comment) => (
+            {Comments.map((comment) => (
               <Comment comment={comment} className='mb-6' key={comment.id}/>
             ))}
         </div>

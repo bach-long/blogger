@@ -56,7 +56,6 @@ export const getById = async (articleId) => {
     try {
         const res = await ky.get(`http://127.0.0.1:8000/api/article/${articleId}`,{headers: {'Authorization': `Bearer ${localStorage.getItem('token')}`}}
         ).json();
-        console.log(res);
         return res;
     } catch (error) {
         return {

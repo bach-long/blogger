@@ -29,10 +29,8 @@ const FormCreate = ({articleId, userId}) => {
   useEffect(()=>{
       if(articleId && userId) {
         const getData = async () => {
-          console.log(userId);
           let {data} = await getById(articleId);
-          console.log(data);
-          if(data?.author?.id == userId){
+          if(data.author.id == userId){
             setValue(data.content);
             setTitle(data.title);
             setCategoryId(data.category_id);
@@ -118,7 +116,6 @@ const FormCreate = ({articleId, userId}) => {
     });
 
     let res = await upload(data);
-    console.log(res);
     let images = ''
     res.data.forEach((i) => {
       images += `![image](${i.img_link})\n`
@@ -140,7 +137,6 @@ const FormCreate = ({articleId, userId}) => {
       //if(!res.data.success) {
       //  console.log(res.data.message);
       //} else {
-        console.log(res);
       //}
       navigate(`/detail/${res.data.id}`)
     }
@@ -159,7 +155,6 @@ const FormCreate = ({articleId, userId}) => {
         data.append('deleted[]', JSON.stringify(deletedFiles[0]));
       }
       let res = await editArticle(data);
-      console.log(res); 
       navigate(`/detail/${articleId}}`);
     } else {
       console.log('fill all neccessary fields');

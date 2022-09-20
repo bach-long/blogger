@@ -20,7 +20,7 @@ const CategoryArticles = () => {
       setCategory(res.data.category.name);
     }
     getAll();
-  }, params.categoryId)
+  }, [params.categoryId])
 
   const handleChangePage = async (page) => {
     let res

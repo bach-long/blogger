@@ -1,6 +1,6 @@
 import React, {useRef, useState} from 'react'
 import { search } from '../api/searchApi';
-import { SearchOutlined } from '@ant-design/icons';
+import { CloseCircleFilled, SearchOutlined } from '@ant-design/icons';
 import { Avatar, Divider, List, Skeleton } from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import moment from 'moment';
@@ -12,13 +12,13 @@ const Search = () => {
   const typingTimeout = useRef(null);
 
   const handleSearch = (e) => {
-    let value = e.target.value;
+    let value = e.target.value
     setInput(value);
     if(typingTimeout.current) {
         clearTimeout(typingTimeout.current);
     }
     if(value === ''){
-        setResults(undefined);
+        setResults();
     } else {
         typingTimeout.current = setTimeout(async ()=>{
             let tempt = await search(value);
@@ -30,8 +30,18 @@ const Search = () => {
   return (
     <div className='container mx-auto'>
         <div className='flex justify-center'>
-            <input value={input} onChange={handleSearch} className="border-2 border-gray-300 bg-white h-10 w-96 px-5 pr-16 rounded-lg text-sm font-medium focus:outline-none"
-            type="search" name="search" placeholder="Search"></input> 
+            <div className='inline-block relative'>
+              <input value={input} onChange={handleSearch} className="border-2 border-gray-300 bg-white h-10 w-96 px-5 pr-6 rounded-lg text-sm font-medium focus:outline-none"
+                type="search" name="search" placeholder="Search"></input>
+                {input !== '' ?
+                <CloseCircleFilled className='absolute right-2 top-3 text-black hover:text-gray-400 cursor-pointer' style={{fontSize: '1rem'}}
+                onClick={
+                  ()=>{setInput(''); 
+                  clearTimeout(typingTimeout.current); 
+                  setResults()}}/> :
+                <SearchOutlined className='absolute right-2 top-3 text-black'/>
+                } 
+            </div> 
         </div>
         {results &&
         <div className='flex justify-center'>

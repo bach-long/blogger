@@ -4,6 +4,8 @@ import { getAllCategories } from '../api/categoryApi';
 import { getRecentArticles, getMostViewed} from '../api/articleApi';
 import { me } from '../api/userApi';
 import { memo } from 'react';
+import { io } from 'socket.io-client';
+import { getAll } from '../api/notificationApi';
 
 export const LayoutContext = React.createContext(); 
 
@@ -12,23 +14,41 @@ const LayoutProvider = ({ children }) => {
   const [categories, setCategories] = useState([]);
   const [mostViewed, setMostViewed] = useState([]);
   const [mainUser, setMainUser] = useState({});
+  const [socket, setSocket] = useState();
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(()=>{
     const getData = async () =>  {
       let res = await getRecentArticles();
       let res1 = await getAllCategories();
       let res2 = await getMostViewed();
-      let token = localStorage.getItem('token'); 
-      if(token) {
+      if(localStorage.getItem('token')) {
         let res3 = await me();
-        setMainUser(res3)
+        let newSocket = io('http://localhost:5000'); 
+        newSocket.emit("newUser", res3?.username);
+        let res4 = await getAll();
+        setMainUser(res3);
+        setSocket(newSocket);
+        setNotifications(res4);
       }
       setRecentArticles(res.data);
       setCategories(res1.data);
-      setMostViewed(res2.data);
+      setMostViewed(res2.data); 
     }
     getData();
   }, [localStorage.getItem('token')])
+    
+  useEffect(() => {
+    if(socket) {
+      socket.on("getNotification", (data) => {
+        console.log(data);
+        setNotifications([data, ...notifications])
+      });
+    } else {
+      return;
+    }
+  }, [socket]);
+  
   return (
     <LayoutContext.Provider
       value={{
@@ -36,7 +56,10 @@ const LayoutProvider = ({ children }) => {
         mostViewed,
         recentArticles,
         mainUser,
-        setMainUser
+        setMainUser,
+        socket,
+        notifications,
+        setNotifications,
       }}
     >
       { children }

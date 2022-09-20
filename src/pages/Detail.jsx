@@ -25,6 +25,7 @@ const Detail = () => {
       setComments(res2.data)
     }
     getData();
+    console.log('rerender');
   }, [params.articleId])
 
   return (

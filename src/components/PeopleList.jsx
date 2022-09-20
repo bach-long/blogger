@@ -27,7 +27,7 @@ const PeopleList = ({list, userId}) => {
     </div>
     {list.length > 6 &&
     <div className='flex justify-center text-black hover:text-teal-400 cursor-pointer mt-10'>
-        <span className='text-xl font-semibold' onClick={()=>setAmount((prev)=>(prev + 6))}>More...</span>
+        <span className='text-xl font-semibold' onClick={()=>setAmount((prev)=>(prev > list.length + 6 ? prev : prev + 6 ))}>More...</span>
     </div>}
     </div>
   )

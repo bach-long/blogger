@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react'
 import { CloseCircleFilled } from '@ant-design/icons';
 import { Image } from 'antd';
 import { PlusSquareFilled } from '@ant-design/icons'; 
-import {upload} from '../api/imageApi';
+import {deleteImage, upload} from '../api/imageApi';
 
 const Images = ({list}) => {
   const[images, setImages] = useState(list);
@@ -20,6 +20,9 @@ const Images = ({list}) => {
     let res = await upload(data);
     setImages((prev)=>([...prev, ...res.data]));
   }
+  const handleDelete = async (id, name) => {
+    await deleteImage(id, name);
+  }
   return (
     <div>
     <div className='flex justify-end'>
@@ -34,8 +37,12 @@ const Images = ({list}) => {
           <div className='lg:col-span-3 col-span-1 py-4 rounded'>
           <div className='flex justify-start relative'>
               <Image className='flex-none' src={image.img_link}/>
-              <div className='absolute text-gray-400 -right-2 -top-2 hover:text-gray-500 cursor-pointer'>
-                  <CloseCircleFilled style={{fontSize: '1.5rem'}}/>
+              <div className='absolute text-gray-400 -right-2 -top-2 hover:text-gray-500 cursor-pointer inline-block'>
+                  <CloseCircleFilled style={{fontSize: '1.5rem'}} onClick={async ()=>{
+                    await handleDelete(image.id, image.img_link.substr(image.img_link.indexOf('images/') + 7, image.img_link.length));
+                    let imagesCopy = images.filter(item => item.id != image.id);
+                    setImages(imagesCopy);
+                    console.log(imagesCopy)}}/>
               </div>
           </div>
         </div>
@@ -44,7 +51,7 @@ const Images = ({list}) => {
     {images.length > 6 &&
     <div className='flex justify-center text-black hover:text-teal-400 cursor-pointer mt-10'>
         <button className='text-xl font-semibold' onClick={()=>{
-          setAmount((prev)=>(prev + 6));
+          setAmount((prev)=>(prev > images.length + 6 ? prev : prev + 6 ));
           console.log(amount)}}>More...</button>
     </div>}
     </div>

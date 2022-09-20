@@ -99,7 +99,6 @@ const Info = ({info}) => {
     }
     if(check) {
       let res = await editProfile(data);
-      console.log(res);
       window.location.reload();
     } else {
       console.log('fill all neccessary fields');

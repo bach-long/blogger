@@ -1,12 +1,19 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import { Button } from 'antd/lib/radio';
 import { followHandle } from '../../api/userApi';
 
-const Follow = ({follow, userId, followingId}) => {
-  const [icon, setIcon] = useState(()=>{return follow ? 1 : 0})
+const Follow = ({follow, userId, followingId, sends}) => {
+  //console.log(follow, userId, followingId);
+  const [icon, setIcon] = useState(0);
+  useEffect(()=>{
+    setIcon(follow ? 1 : 0);
+  },[follow, userId, followingId])
   //console.log(follow);
   const handleChange = async () => {
     await followHandle(userId, followingId);
+    if(sends) {
+      await sends(2)
+    }
     setIcon((prev)=>(1-prev))
   } 
   if(icon == 0) {

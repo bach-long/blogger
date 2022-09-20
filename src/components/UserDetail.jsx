@@ -11,6 +11,8 @@ import Chart from './Chart';
 import { useParams, useNavigate } from 'react-router-dom';
 import PeopleList from './PeopleList';
 import Images from './Images';
+import { LayoutContext } from '../context/LayoutProvider';
+import Follow from './Buttons/Follow';
 
 const UserDetail = () => {
   const [articles, setArticles] = useState();
@@ -18,10 +20,9 @@ const UserDetail = () => {
   const [info, setInfo] = useState();
   const [articlePage, setArticlePage] = useState(1);
   const [bookmarkPage, setBookmarkPage] = useState(1);
-  const [articleTotal, setArticleTotal] = useState(5);
-  const [bookmarkTotal, setBookmarkTotal] = useState(5);
   const [statistic, setStatistic] = useState();
   const [item, setItem] = useState('info');
+  const {mainUser} = React.useContext(LayoutContext);
 
   const params = useParams();
   const navigate = useNavigate();
@@ -33,10 +34,8 @@ const UserDetail = () => {
       let res2 = await getInfo(params.id);
       let res3 = await getStatistic(params.id);
       setInfo(res2.data);
-      setArticles(res.data.data);
-      setBookmark(res1.data.data);
-      setBookmarkTotal(res1.data.total);
-      setArticleTotal(res.data.total);
+      setArticles(res.data);
+      setBookmark(res1.data);
       setStatistic(res3.data);
     }
     getData();
@@ -47,7 +46,7 @@ const UserDetail = () => {
     res = await getArticlesOfUser(params.id, page)
 
     if (res) {
-        setArticles(res.data.data)
+        setArticles(res.data)
         setArticlePage(page)
     }
   }
@@ -57,7 +56,7 @@ const UserDetail = () => {
     res = await getBookmark(params.id, page)
 
     if (res) {
-        setBookmark(res.data.data)
+        setBookmark(res.data)
         setBookmarkPage(page)
     }
   }
@@ -79,6 +78,9 @@ const UserDetail = () => {
                   src={info?.avatar}
                 />
                 <p className="inline align-middle text-gray-700 ml-2 mt-4 font-medium text-2xl">{info?.username}</p>
+                {mainUser && info && mainUser.id !== info.id &&
+                <Follow follow={info.isFollowing} userId={mainUser.id} followingId={info.id}/>
+                }
             </div>
             <div className={`mt-4`}>
             <Menu mode="horizontal" defaultSelectedKeys={['info']}
@@ -120,19 +122,19 @@ const UserDetail = () => {
                     } else if (item=='articles') {
                       return (
                         <div>
-                          {articles.map((article)=>(
+                          {articles.data.map((article)=>(
                             <Postcard article={article} key={article.id}/>
                           ))}
-                          {articleTotal > 6 && <Paginate page={articlePage} total={articleTotal} onChange={handleChangeArticlePage}/>}
+                          {articles.total > 6 && <Paginate page={articlePage} total={articles.total} onChange={handleChangeArticlePage}/>}
                         </div>
                       )
                     } else if (item =='bookmark') {
                       return (
                         <div>
-                          {bookmark.map((article)=>(
+                          {bookmark.data.map((article)=>(
                             <Postcard article={article} key={article.id}/>
                           ))}
-                          {bookmarkTotal > 6 && <Paginate page={bookmarkPage} total={bookmarkTotal} onChange={handleChangeBookmarkPage}/>}
+                          {bookmark.total > 6 && <Paginate page={bookmarkPage} total={bookmark.total} onChange={handleChangeBookmarkPage}/>}
                         </div>
                       )
                     } else if (item == 'statistic') {
@@ -144,14 +146,14 @@ const UserDetail = () => {
                       )
                     } else if (item == 'following'){
                       return(
-                        <PeopleList list={info?.following} userId={info.id}/>
+                        <PeopleList list={info.following} userId={info.id}/>
                       )
                     } else if (item == 'followed'){
                       return(
-                        <PeopleList list={info?.followers} userId={info.id}/>
+                        <PeopleList list={info.followers} userId={info.id}/>
                       )
                     } else {
-                      return <Images list={info?.images}/>
+                      return <Images list={info.images}/>
                     } 
                   } else {
                     return (
@@ -170,7 +172,7 @@ const UserDetail = () => {
             <div className="bg-white shadow-lg rounded-lg lg:p-8 pb-12 mb-8">
               <h3 className='text-xl mb-8 font-semibold border-b pb-4 text-center'>Overall</h3>
               <div className='drop-shadow-lg pb-3 mb-3 text-xl font-semibold'>
-                <span>{`Articles: ${articleTotal}`}</span>
+                <span>{`Articles: ${articles?.total}`}</span>
               </div>
               <div className='drop-shadow-lg pb-3 mb-3 text-xl font-semibold'>
                 <span>{`Viewed: ${info?.view?.length}`}</span>
@@ -182,7 +184,10 @@ const UserDetail = () => {
                 <span>{`Followers: ${info?.followers?.length}`}</span>
               </div>
               <div className='drop-shadow-lg pb-3 mb-3 text-xl font-semibold'>
-                <span>{`Bookmarks: ${bookmarkTotal}`}</span>
+                <span>{`Bookmarks: ${bookmark?.total}`}</span>
+              </div>
+              <div className='drop-shadow-lg pb-3 mb-3 text-xl font-semibold'>
+                <span>{`Imagess: ${info?.images?.length}`}</span>
               </div>
             </div> 
           </div>

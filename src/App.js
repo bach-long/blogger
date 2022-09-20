@@ -5,14 +5,12 @@ import Create from './pages/Create';
 import Home from './pages/Home';
 import {Routes, Route} from 'react-router-dom';
 import CategoryArticles from './pages/CategoryArticles';
-import LayoutProvider from './context/LayoutProvider';
 import User from './pages/User';
 import AuthPage from './pages/AuthPage';
 import Edit from './pages/Edit';
 
 function App() {
   return (
-    <LayoutProvider>
     <Routes>
         <Route path='/authenticate' element={<AuthPage/>}/>
         <Route path='/' element={<Home/>}/>
@@ -22,7 +20,6 @@ function App() {
         <Route path='/category/:categoryId/articles' element={<CategoryArticles/>}/>
         <Route path='/user/:id' element={localStorage.getItem('token') ? <User/> : <AuthPage/>}/>
     </Routes>
-    </LayoutProvider>
   );
 }
 
