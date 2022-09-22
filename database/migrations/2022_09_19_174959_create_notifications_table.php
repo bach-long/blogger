@@ -17,6 +17,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->bigInteger('sender_id');
             $table->bigInteger('receiver_id');
+            $table->bigInteger('article_id')->nullable();
             $table->integer('type')->comment('1: like, 2: follow, 3: bookmark, 4: comment');
             $table->timestamps();
         });

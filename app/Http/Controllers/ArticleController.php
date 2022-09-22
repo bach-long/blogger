@@ -15,17 +15,7 @@ class ArticleController extends Controller
     //
     public function getAll(Request $request) {
         try {
-            $articles=Article::paginate(6);
-            foreach($articles as $article) {
-                if($request->user()) {
-                    dd($request->user());
-                }
-                $article->comments;
-                $article->author;
-                $article->category;
-                $article->view;
-                $article->bookmark;
-            }
+            $articles=Article::with('comments', 'author', 'category', 'view', 'bookmark')->orderBy('id', 'DESC')->paginate(6);
             return response()->json([
                 'data' => $articles,
                 'message' => 'success'
@@ -40,15 +30,8 @@ class ArticleController extends Controller
 
     public function getRecentArticles() {
         try {
-            $articles = Article::limit(3)->orderBy('created_at')->get();
+            $articles = Article::with('author')->limit(3)->orderBy('id', 'DESC')->get();
             if($articles) {
-                foreach($articles as $article) {
-                    $article->comments;
-                    $article->author;
-                    $article->category;
-                    $article->view;
-                    $article->bookmark;
-                }
                 return response()->json([
                     'data' => $articles,
                     'message' => 'success'
@@ -95,6 +78,7 @@ class ArticleController extends Controller
                 $article->view;
                 $article->bookmark;
                 return response()->json([
+                    'success' => true,
                     'data' => $article,
                     'message' => 'success',
                     'isLike' => $isLiked,
@@ -107,7 +91,7 @@ class ArticleController extends Controller
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'not found'
+                    'message' => 'Article not found'
                 ], 404);
             }
         } catch (Exception $err) {
@@ -120,15 +104,8 @@ class ArticleController extends Controller
 
     public function getMostViewedArticles() {
         try {
-            $articles = Article::limit(15)->get();
+            $articles = Article::with('comments', 'author', 'category', 'view', 'bookmark')->limit(10)->orderBy('view_count', 'DESC')->get();
             if($articles) {
-                foreach($articles as $article) {
-                    $article->comments;
-                    $article->author;
-                    $article->category;
-                    $article->view;
-                    $article->bookmark;
-                }
                 return response()->json([
                     'data' => $articles,
                     'message' => 'success'
@@ -150,15 +127,8 @@ class ArticleController extends Controller
     public function getRelatedArticles($categoryId) {
         try{
             $category = Category::find($categoryId);
-            $articles = $category->articles()->limit(10)->get();
+            $articles = $category->articles()->with('comments', 'author', 'category', 'view', 'bookmark')->limit(10)->get();
             if($articles) {
-                foreach($articles as $article) {
-                    $article->comments;
-                    $article->author;
-                    $article->category;
-                    $article->view;
-                    $article->bookmark;
-                }
                 return response()->json([
                     'data' => $articles,
                     'message' => 'success'
@@ -264,7 +234,7 @@ class ArticleController extends Controller
     public function getComments($articleId) {
         $comments = [];
         try {
-            $data = Comment::where('parent_id', null)->where('article_id', $articleId)->orderBy('updated_at', 'DESC')->get();
+            $data = Comment::where('parent_id', null)->where('article_id', $articleId)->orderBy('id', 'DESC')->get();
             foreach($data as $comment) {
                     $comment->user;
                     $comment->childs;
@@ -282,6 +252,39 @@ class ArticleController extends Controller
                 'success' => false,
                 'message' => $err->getMessage()
             ]);
+        }
+    }
+
+    public function softDeleteArticle($id) {
+        $article = Article::find($id);
+        if($article) {
+            $article->delete($id);
+            return response()->json([
+                'success' => true,
+                'message' => 'article deleted'
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'not found'
+            ], 404); 
+        }
+    } 
+
+    public function restore($id) {
+        $article = Article::onlyTrashed()->find($id);
+        if($article) {
+            $article->restore();
+            return response()->json([
+                'success' => true,
+                'data' => $article,
+                'message' => 'succeeded'
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'not found'
+            ], 404);
         }
     }
 }

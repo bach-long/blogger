@@ -16,6 +16,7 @@ class NotificationController extends Controller
                 'sender_id' => $user->id,
                 'receiver_id' => $request->receiverId,
                 'type' => $request->type,
+                'article_id' => $request->articleId
             ]);
             $data->sender;
             return response()->json([

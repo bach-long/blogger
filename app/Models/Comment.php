@@ -20,6 +20,16 @@ class Comment extends Pivot
         'reply_id',
     ];
 
+    protected static function boot() {
+        parent::boot();
+
+        static::deleting(function ($comment) {
+            foreach($comment->childs as $child) {
+                $child->delete();
+            }
+        });
+    }
+
     public function childs()
     {
         return $this->hasMany(Comment::class, 'parent_id', 'id');

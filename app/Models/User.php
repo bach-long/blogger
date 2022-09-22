@@ -78,9 +78,9 @@ class User extends Authenticatable
         return $this->belongsToMany(User::class, 'follow', 'following_id', 'follower_id');
     }
     public function sends() {
-        return $this->belongsToMany(User::class, 'notification', 'sender_id', 'receiver_id')->using(Notification::class)->withPivot('id', 'type')->withTimestamps();
+        return $this->belongsToMany(User::class, 'notification', 'sender_id', 'receiver_id')->using(Notification::class)->withPivot('id', 'article_id', 'type')->withTimestamps();
     }
     public function receives() {
-        return $this->belongsToMany(User::class, 'notification', 'receiver_id', 'sender_id')->using(Notification::class)->withPivot('id', 'type')->withTimestamps();
+        return $this->belongsToMany(User::class, 'notification', 'receiver_id', 'sender_id')->using(Notification::class)->withPivot('id', 'article_id', 'type')->withTimestamps();
     }
 }

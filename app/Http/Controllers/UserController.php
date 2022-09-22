@@ -40,14 +40,7 @@ class UserController extends Controller
         try {
             $user = User::find($id);
             if($user) {
-                $articles = $user->bookmark()->paginate(6);
-                foreach($articles as $article) {
-                    $article->comments;
-                    $article->author;
-                    $article->view;
-                    $article->category;
-                    $article->bookmark;
-                }
+                $articles = $user->bookmark()->with('comments', 'author', 'category', 'view', 'bookmark')->paginate(6);
                 return response()->json([
                     'data' => $articles,
                     'message' => 'success'
@@ -76,9 +69,9 @@ class UserController extends Controller
             }
             if($user) {
                 $user->view;
-                $user->following;
-                $user->followers;
-                $user->images = $user->images()->orderBy('created_at', 'DESC')->get();
+                $user->following = $user->following()->orderBy('id', 'DESC')->get();
+                $user->followers = $user->followers()->orderBy('id', 'DESC')->get();
+                $user->images = $user->images()->orderBy('id', 'DESC')->get();
                 $user->isFollowing = $isFollowing;
                 return response()->json([
                     'data' => $user,
@@ -158,13 +151,23 @@ class UserController extends Controller
     }
 
     public function me(Request $request) {
-        $user =  $request->user();
-        $user->likes;
-        $user->bookmark;
-        $user->view;
-        $user->following;
-        $user->followers;
-        return $user;
+        if($request->header('authorization') && $request->header('authorization') !== 'Bearer null'){
+            $user = PersonalAccessToken::findToken(substr($request->header('authorization'),7));
+            if($user) {
+                return response()->json([
+                    'success' => true,
+                    'data' => $user->tokenable
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false
+                ]);
+            }
+        } else {
+            return response()->json([
+                'success' => false
+            ]);
+        }
     }
 
     public function editProfile(Request $request) {
@@ -274,10 +277,49 @@ class UserController extends Controller
         }
     }
 
+    public function deleteComment($commentId) {
+        
+        if (Comment::find($commentId)->delete()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'comment deleted'
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'not found'
+            ], 404);
+        }
+    }
+
     public function getAllNotifications(Request $request) {
         $user = $request->user();
         $data = $user->receives;
         return $data; 
+    }
+
+    public function softDeletedArticles($id) {
+        try {
+            $user = User::find($id);
+            if($user) {
+                $articles = $user->articles()->onlyTrashed()->with('comments', 'author', 'category', 'view', 'bookmark')
+                ->orderBy('deleted_at', 'DESC')->paginate(6);
+                return response()->json([
+                    'data' => $articles,
+                    'message' => 'success'
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'not found'
+                ], 404);
+            }
+        } catch (Exception $err) {
+            return response()->json([
+                'success' => false,
+                'message' => $err->getMessage()
+            ]);
+        }
     }
 
 }

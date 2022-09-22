@@ -5,10 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Article extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
+    
+    protected $dates = ['deleted_at'];
+
     protected $fillable = [
         'title',
         'content',
@@ -39,10 +43,6 @@ class Article extends Model
     public function comments()
     {
         return $this->belongsToMany(User::class, 'comment', 'article_id', 'user_id')->using(Comment::class)->withPivot('id', 'content', 'parent_id', 'reply_id')->withTimestamps();
-    }
-    public function thumbnail()
-    {
-        return $this->hasOne(Image::class, 'article_id', 'id');
     }
     public function view()
     {

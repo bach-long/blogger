@@ -8,6 +8,7 @@ use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\UserController;
+use App\Models\Article;
 use App\Models\Category;
 
 /*
@@ -31,11 +32,13 @@ Route::post('/auth/signup', [AuthController::class, 'signup']);
 Route::get('/user/{id}/articles', [UserController::class, 'getArticles']);
 Route::get('/user/{id}/info', [UserController::class, 'getInfo']);
 Route::get('/user/{id}/bookmark', [UserController::class, 'getBookmark']);
+Route::get('/user/{id}/softDeleted', [UserController::class, 'softDeletedArticles']);
 Route::get('/user/{id}/statistic', [UserController::class, 'statistic']);
+
+Route::get('/me', [UserController::class, 'me']);
 
 Route::middleware('auth:sanctum')->group( function () {
     Route::post('/article/create', [ArticleController::class, 'createArticle']);
-    Route::get('/me', [UserController::class, 'me']);
     Route::post('/bookmark', [UserController::class, 'toggleBookmark']);
     Route::post('/follow', [UserController::class, 'toggleFollow']);
     Route::post('/react', [UserController::class, 'toggleLike']);
@@ -48,6 +51,9 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::post('/image/delete', [UploadController::class, 'deleteImage']);
     Route::post('/notification/send', [NotificationController::class, 'notify']);
     Route::get('/notification/all', [UserController::class, 'getAllNotifications']);
+    Route::delete('/comment/delete/{commentId}', [UserController::class, 'deleteComment']);
+    Route::delete('/article/delete/{id}', [ArticleController::class, 'softDeleteArticle']);
+    Route::post('/article/restore/{id}', [ArticleController::class, 'restore']);
 });
 
 Route::get('/article/all', [ArticleController::class, 'getAll']);

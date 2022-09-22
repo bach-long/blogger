@@ -53,7 +53,7 @@ class AuthController extends Controller
             'username/email' => 'required|string',
             'password' => 'required|string',
         ]);
-        $user = User::where('username', $fields['username/email'])->orWhere('email', $fields['username/email'])->first();
+        $user = User::where(DB::raw('BINARY `username`'), $fields['username/email'])->orWhere(DB::raw('BINARY `email`'), $fields['username/email'])->first();
         if (!$user || $fields['password'] !== $user->password) {
             return response()->json([
                 'success' => false,

@@ -16,6 +16,7 @@ class Notification extends Pivot
         'sender_id',
         'receiver_id',
         'type',
+        'article_id'
     ];
 
     public function sender() {
