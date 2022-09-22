@@ -22,11 +22,15 @@ const PostDetail = ({article, comments}) => {
     setLikeCount(article.likeCount);
     setdislikeCount(article.dislikeCount);
   }, [article, comments]);
+  console.log(comments);
   const {mainUser, socket} = React.useContext(LayoutContext);
   const navigate = useNavigate();
-
   const handleNotification = async (type) => {
-    let res = await notify(article.data.author.id, type);
+    let articleId = article.data.id
+    if(type === 2) {
+      articleId = null;
+    }
+    let res = await notify(article.data.author.id, type, articleId);
     socket.emit("sendNotification", {...res.data.sender, pivot: res.data, receiverName: article.data.author.username});
   }
 
@@ -70,52 +74,54 @@ const PostDetail = ({article, comments}) => {
           className="object-top h-full w-full object-cover  shadow-lg rounded-t-lg lg:rounded-lg" />
         </div>
         <div className="px-4 lg:px-0">
-          <div className="flex items-center mb-8 w-full">
-            <div className="md:flex items-center justify-center lg:mb-0 lg:w-auto mr-8 items-center">
-              <div className='flex items-center text-2xl ml-4'>
-                <EyeFilled/>
-                <span className='ml-2'>{article.data.view_count}</span>
-              </div>
-              <div className='flex items-center text-2xl ml-4'>
-                <BookFilled/>
-                <span className='ml-2'>{article.data.bookmark.length}</span>
-              </div>
-              <div className='flex items-center text-2xl ml-4'>
-                <CommentOutlined/>
-                <span className='ml-2'>{article.data.comments.length}</span>
-              </div>
-              {!localStorage.getItem('token') && 
-               <div className='flex justify-end font-semibold ml-96 text-2xl'>
-                  <Link to={'/authenticate'}><span className='mt-6 text-black cursor-pointer hover:text-teal-400 ml-16'><LoginOutlined style={{marginBottom: '12px'}}/></span></Link>
-               </div>
-              }
-              {localStorage.getItem('token') && 
-              <div className='flex justify-end ml-72'>
-                {/*<Like count={likeCount} value={like} setLike={setLike} userId={mainUser.id} articleId={article.data.title}/>*/}
+          <div className="mb-8 w-full">
+            <div className="lg:mb-0 lg:w-auto mr-8">
+              <div className='flex justify-start items-center float-left mt-2'>
                 <div className='flex items-center text-2xl ml-4'>
-                {like === 1  ?
-                  <LikeFilled style={{fontSize: '2rem'}} onClick={handleLike}/> :
-                  <LikeOutlined style={{fontSize: '2rem'}} onClick={handleLike}/> 
-                }
-                <span className='ml-2'>{likeCount}</span>
-                </div>     
-              </div>}
-              {localStorage.getItem('token') && 
-              <div className='flex justify-end ml-2'>
-                <div className='flex items-center text-2xl ml-4'> 
-                {like === 0  ?
-                  <DislikeFilled style={{fontSize: '2rem'}} onClick={handleDislike}/> :
-                  <DislikeOutlined style={{fontSize: '2rem'}} onClick={handleDislike}/> }
-                  <span className='ml-2'>{dislikeCount}</span>
-                </div> 
-              </div>}
-              {localStorage.getItem('token') && 
-              <div className='flex justify-end ml-2'>
-                <div className='flex items-center text-2xl ml-4'>
-                  <Bookmark bookmark = {article.isBookmarked} userId={mainUser.id} authorId={article.data.author.id} articleId={article.data.id} 
-                  sends={article.isBookmarked ? null : handleNotification}/>
+                  <EyeFilled/>
+                  <span className='ml-2'>{article.data.view_count}</span>
                 </div>
-              </div>}
+                <div className='flex items-center text-2xl ml-4'>
+                  <BookFilled/>
+                  <span className='ml-2'>{article.data.bookmark.length}</span>
+                </div>
+                <div className='flex items-center text-2xl ml-4'>
+                  <CommentOutlined/>
+                  <span className='ml-2'>{article.data.comments.length}</span>
+                </div>
+              </div>
+              <div className='flex justify-end items-center float-right mb-4'>
+                {!localStorage.getItem('token') && 
+                 <div className='flex justify-end font-semibold text-2xl'>
+                    <Link to={'/authenticate'}><span className='mt-6 text-black cursor-pointer hover:text-teal-400 ml-16'><LoginOutlined style={{marginBottom: '12px'}}/></span></Link>
+                 </div>
+                }
+                {localStorage.getItem('token') && 
+                  <div className='flex justify-end items-center text-2xl ml-4'>
+                  {like === 1  ?
+                    <LikeFilled style={{fontSize: '2rem'}} onClick={handleLike}/> :
+                    <LikeOutlined style={{fontSize: '2rem'}} onClick={handleLike}/> 
+                  }
+                  <span className='ml-2'>{likeCount}</span>
+                  </div>     
+                }
+                {localStorage.getItem('token') && 
+                <div className='flex justify-end ml-2'>
+                  <div className='flex justify-end items-center text-2xl ml-4'> 
+                  {like === 0  ?
+                    <DislikeFilled style={{fontSize: '2rem'}} onClick={handleDislike}/> :
+                    <DislikeOutlined style={{fontSize: '2rem'}} onClick={handleDislike}/> }
+                    <span className='ml-2'>{dislikeCount}</span>
+                  </div> 
+                </div>}
+                {localStorage.getItem('token') && 
+                <div className='flex justify-end ml-2'>
+                  <div className='flex justify-end items-center text-2xl ml-4'>
+                    <Bookmark bookmark = {article.isBookmarked} userId={mainUser.id} authorId={article.data.author.id} articleId={article.data.id} 
+                    sends={article.isBookmarked ? null : handleNotification}/>
+                  </div>
+                </div>}
+              </div>
             </div>
           </div>
           <div className="flex items-center mb-8 w-full">

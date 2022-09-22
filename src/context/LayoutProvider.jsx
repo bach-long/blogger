@@ -22,27 +22,27 @@ const LayoutProvider = ({ children }) => {
       let res = await getRecentArticles();
       let res1 = await getAllCategories();
       let res2 = await getMostViewed();
-      if(localStorage.getItem('token')) {
-        let res3 = await me();
+      let res3 = await me();
+      if(res3.success) {
         let newSocket = io('http://localhost:5000'); 
-        newSocket.emit("newUser", res3?.username);
+        newSocket.emit("newUser", res3.data.username);
         let res4 = await getAll();
-        setMainUser(res3);
+        setMainUser(res3.data);
         setSocket(newSocket);
         setNotifications(res4);
+      } else {
+        localStorage.clear();
       }
       setRecentArticles(res.data);
       setCategories(res1.data);
-      setMostViewed(res2.data); 
-    }
-    getData();
+      setMostViewed(res2.data);
+    } 
+      getData();
   }, [localStorage.getItem('token')])
-    
   useEffect(() => {
     if(socket) {
       socket.on("getNotification", (data) => {
-        console.log(data);
-        setNotifications([data, ...notifications])
+        setNotifications((prev)=>([data, ...prev]))
       });
     } else {
       return;

@@ -19,7 +19,6 @@ export const getInfo = async (userId) => {
         const res = await ky.get(`http://127.0.0.1:8000/api/user/${userId}/info`,{
             headers: {'Authorization': `Bearer ${localStorage.getItem('token')}`}
         }).json();
-        console.log(res);
         return res;
     } catch (error) {
         return {
@@ -61,7 +60,6 @@ export const bookmarkHandle = async (userId, articleId) => {
             headers: {'Authorization': `Bearer ${localStorage.getItem('token')}`},
             json: {'userId' : userId, 'articleId': articleId}
         }).json();
-        console.log(res);
         return res;
     } catch (error) {
         return {
@@ -77,7 +75,6 @@ export const followHandle = async (userId, followingId) => {
             headers: {'Authorization': `Bearer ${localStorage.getItem('token')}`},
             json: {'userId' : userId, 'followingId': followingId}
         }).json();
-        console.log(res);
         return res;
     } catch (error) {
         return {
@@ -93,7 +90,6 @@ export const reactHandle = async (articleId, value) => {
             headers: {'Authorization': `Bearer ${localStorage.getItem('token')}`},
             json: {'articleId': articleId, 'value': value}
         }).json();
-        console.log(res);
         return res;
     } catch (error) {
         return {
@@ -153,7 +149,6 @@ export const createComment = async (articleId, content, parentId, replyId) => {
         {'Authorization': `Bearer ${localStorage.getItem('token')}`}, 
         json: {'articleId': articleId, 'parentId': parentId, 'replyId' : replyId, 'content': content }
         }).json();
-        console.log(res)
         return res;
     } catch (error) {
         return {
@@ -169,7 +164,6 @@ export const editComment = async (commentId, content) => {
         {'Authorization': `Bearer ${localStorage.getItem('token')}`}, 
         json: {'id': commentId, 'content': content}
         }).json();
-        console.log(res)
         return res;
     } catch (error) {
         return {
@@ -178,3 +172,32 @@ export const editComment = async (commentId, content) => {
         }
     }
 }
+
+export const deleteComment = async (commentId) => {
+    try {
+        const res = await ky.delete(`http://127.0.0.1:8000/api/comment/delete/${commentId}`,{headers: 
+        {'Authorization': `Bearer ${localStorage.getItem('token')}`}}).json();
+        return res;
+    } catch (error) {
+        return {
+            success: false,
+            message: error.message
+        }
+    }
+}
+
+export const getSoftDeletedArticles = async (userId, page) => {
+    try {
+        const res = await ky.get(`http://127.0.0.1:8000/api/user/${userId}/softDeleted`, {
+            searchParams: {page}
+        }
+        ).json();
+        return res;
+    } catch (error) {
+        return {
+            success: false,
+            message: error.message
+        }
+    }
+}
+

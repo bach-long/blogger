@@ -103,9 +103,37 @@ export const editArticle = async (request) => {
     }
 }
 
+export const softDeleteArticle = async (id) => {
+    try {
+        const res = await ky.delete(`http://127.0.0.1:8000/api/article/delete/${id}`, {
+            headers: {'Authorization': `Bearer ${localStorage.getItem('token')}`}
+        }).json();
+        return res;
+    } catch (error) {
+        return {
+            success: false,
+            message: error.message
+        }
+    }
+}
+
 export const getComments = async (articleId) => {
     try {
         const res = await ky.get(`http://127.0.0.1:8000/api/article/${articleId}/comments`).json();
+        return res;
+    } catch (error) {
+        return {
+            success: false,
+            message: error.message
+        }
+    }
+}
+
+export const restore = async (id) => {
+    try {
+        const res = await ky.post(`http://127.0.0.1:8000/api/article/restore/${id}`, {
+            headers: {'Authorization': `Bearer ${localStorage.getItem('token')}`}
+        }).json();
         return res;
     } catch (error) {
         return {

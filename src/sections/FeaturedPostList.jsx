@@ -49,7 +49,7 @@ const FeaturedPostList = ({list, mostViewed, related}) => {
           </span>
       </div>
       <div className='mb-4 ml-5 inline-block ml-[78%]'>
-        {(related && list.length > 5) &&<Link to={`/category/${related}/articles`}><span className='hover:text-teal-400 font-normal text-2xl text-white'>
+        {(related && list.length > 5) && <Link to={`/category/${related}/articles`}><span className='hover:text-teal-400 font-normal text-2xl text-white'>
                 See more...
         </span></Link>}
       </div>

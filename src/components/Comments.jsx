@@ -1,18 +1,19 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import moment from 'moment';
 import { Link } from 'react-router-dom';
-import { createComment, editComment } from '../api/userApi';
+import { createComment, deleteComment, editComment } from '../api/userApi';
 import { LayoutContext } from '../context/LayoutProvider';
-import { DownOutlined } from '@ant-design/icons';
+import { DownOutlined, UpOutlined } from '@ant-design/icons';
 import CommentForm from './CommentForm';
 
-const Comment = ({comment, parentId}) => {
+const Comment = ({comments, comment, parentId, setComment}) => {
     const [value, setValue] = useState('');
     const [out, setOut] = useState(false);
     const [edit, setEdit] = useState(false);
     const [childs, setChilds] = useState(comment.childs ? comment.childs : []);
     const [editVal, setEditVal] = useState(comment.content)
     const [show, setShow] = useState(false);
+
     const handleSubmit = async (articleId, content, parentId, replyId) => {
       let res = await createComment(articleId, content, parentId, replyId);
       return res.data;
@@ -20,6 +21,10 @@ const Comment = ({comment, parentId}) => {
     const handleEdit = async (commentId, content) => {
       await editComment(commentId, content);
     }
+    const handleDelete = async () => {
+      await deleteComment(comment.id);
+    }
+
     const {mainUser} = React.useContext(LayoutContext);
     return (
         <div key={comment.id} className={`mt-3 ${childs.length > 0 ? '' : 'mb-4 pb-4'} ${!comment.parent_id ? '': 'ml-12'}`}>
@@ -55,14 +60,20 @@ const Comment = ({comment, parentId}) => {
                         className="w-full p-2 outline-none rounded-lg focus:ring-2 focus:ring-gray-200 text-gray-700" />
                     </div>
                     <div className='flex justify-end'>
-                      <button className='text-black hover:text-teal-400 cursor-pointer mx-2' onClick={()=>{setEdit(false); 
-                        setEditVal(comment.content); setOut(false)}}>
+                      <button className='text-black hover:text-teal-400 cursor-pointer mx-2' onClick={()=>{
+                        setEdit(false);
+                        if(out) {
+                          setOut(false);
+                        } 
+                        setEditVal(comment.content)}}>
                         Cancel
                       </button>
                       <button className='text-black hover:text-teal-400 cursor-pointer mx-2' onClick={async ()=>{
                         handleEdit(comment.id, editVal);
                         setEdit(false);
-                        setOut(false);
+                        if(out) {
+                          setOut(false);
+                        }
                       }}>
                         Submit
                       </button>
@@ -79,20 +90,25 @@ const Comment = ({comment, parentId}) => {
                       {mainUser.id === comment.user.id && 
                       <button className='text-black hover:text-teal-400 cursor-pointer mx-2' onClick={()=>{
                         setValue('');
-                        setOut(false);
+                        if(out) {
+                          setOut(false);
+                        }
                         setEdit(true);
                       }}>
                         Edit
                       </button>}
                       {mainUser.id === comment.user.id && 
-                      <button className='text-black hover:text-teal-400 cursor-pointer mx-2'>
+                      <button className='text-black hover:text-teal-400 cursor-pointer mx-2' onClick={()=>{
+                        handleDelete();
+                        let copy = comments.filter(item => item.id != comment.id);
+                        setComment(copy);}}>
                         Delete
                       </button>}
                     </div>
                   </div>}
                   {childs.length > 0 &&
                         <div className='flex justify-start'><button className='text-sm font-bold hover:text-teal-400 cursor-pointer' 
-                        onClick={()=>{setShow((prev)=>(!prev)); setOut(false);}}><DownOutlined/></button></div>
+                        onClick={()=>{setShow((prev)=>(!prev));}}>{show ? <UpOutlined/> : <DownOutlined/>}</button></div>
                   }
                   {out && !edit &&
                   <div>
@@ -108,7 +124,6 @@ const Comment = ({comment, parentId}) => {
                       </div>
                       <div className='mx-2' onClick={async ()=>{
                         let tempt = await handleSubmit(comment.article_id, value, comment.id, comment.id);
-
                         setChilds((prev)=>[...prev, tempt]);
                         setOut(false);
                         setShow(true)
@@ -119,30 +134,36 @@ const Comment = ({comment, parentId}) => {
                       </div>
                     </div>
                   </div>}
-                  {childs.length > 0 && show && childs.map((child)=>(<Comment comment={child} parentId={comment.id} key={child.id}/>))}
+                  {childs.length > 0 && show && childs.map((child)=>(<Comment comments={childs} comment={child} parentId={comment.id} key={child.id} setComment={setChilds}/>))}
                 </div>
         </div>
     );
 }
 
 const Comments = ({comments, article}) => {
-     const [Comments, setComments] = useState(comments.data);
-     const [total, setTotal] = useState(comments.total);
+     const [Comments, setComments] = useState([]);
+     const [total, setTotal] = useState([]);
+
+     useEffect(() => {
+      setComments(comments.data);
+      setTotal(comments.total)
+     }, [comments, article])
+
      return (
     <>
       <CommentForm articleId={article.data.id} setComments={setComments} setTotal={setTotal} comments={Comments}/>
-      {total > 0 && (
+      {total > 0 && 
         <div className="bg-white shadow-lg rounded-lg p-8 pb-12 mb-8">
           <h3 className="text-xl mb-8 font-semibold border-b pb-4">
-            {comments.total}
+            {total}
             {' '}
             Comments
           </h3>
             {Comments.map((comment) => (
-              <Comment comment={comment} className='mb-6' key={comment.id}/>
+              <Comment comments={Comments} comment={comment} className='mb-6' key={comment.id} setComment={setComments}/>
             ))}
         </div>
-      )}
+      }
     </>
   );
 }

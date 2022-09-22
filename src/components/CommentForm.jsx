@@ -2,7 +2,7 @@ import create from '@ant-design/icons/lib/components/IconFont';
 import React, {useState} from 'react'
 import { createComment } from '../api/userApi';
 
-const CommentForm = ({articleId, setComments, setTotal, comments}) => {
+const CommentForm = ({articleId, setComments, setTotal}) => {
   const [input, setInput] = useState('');
   const handleChange = (e) => {
     setInput(e.target.value);
@@ -22,7 +22,7 @@ const CommentForm = ({articleId, setComments, setTotal, comments}) => {
       <div className="mt-8 flex justify-end">
         <button type="button" onClick={async ()=>{
           let res = await handleSubmit();
-          setComments([res, ...comments]);
+          setComments((prev)=>([res, ...prev]));
           setTotal((prev)=>(prev+1));
           setInput('');  
           }} className="inline-block bg-teal-400 text-lg font-medium rounded-full text-white px-4 py-3 cursor-pointer">Post Comment</button>

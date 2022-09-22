@@ -8,20 +8,8 @@ import { useEffect } from 'react';
 import { getAll } from '../api/notificationApi';
 
 const Header = () => {
-  const {categories, mainUser, notifications} = React.useContext(LayoutContext);
+  const {categories, mainUser, notifications, socket} = React.useContext(LayoutContext);
   const navigate = useNavigate();
-
-  //useEffect(()=>{
-  //  const getData = async () => {
-  //    if(localStorage.getItem('token')) {
-  //      let res = await getAll();
-  //      setNotifications(res);
-  //    } else {
-  //      return;
-  //    }
-  //  }
-  //  getData();
-  //}, [localStorage.getItem('token')]);
 
   const menu = (
     <Menu
@@ -47,7 +35,7 @@ const Header = () => {
         {
           key: '3',
           label: (
-            <div className='flex items-center' onClick={async ()=> {await logout(); navigate('/')}}>
+            <div className='flex items-center' onClick={async ()=> {await logout(); socket.emit("logout", {}); navigate('/')}}>
               <span className='mr-2 '>Logout</span>
               <LogoutOutlined/>
             </div>
@@ -64,20 +52,26 @@ const Header = () => {
       label: (
       <div className='flex items-center p-2 hover:shadow'>
         <div className='mr-4'>
-          <img src={notification.avatar} alt={notification.username} 
+          <Link to={`/user/${notification.pivot.sender_id}`}>
+          <img src={notification.avatar} alt={notification.username}
               style={{
                 height: "60px",
                 width: "60px"
-              }} className='rounded-full'/>
+              }} className='rounded-full hover:shadow'/>
+            </Link>
         </div>
+        <Link to={`/detail/${notification.pivot.article_id}`}>
         <div>
-          <p><span className='font-semibold'>{notification.username} </span>{
+          <p className='text-black'>
+            <span className='font-semibold'>{notification.username} </span> {
             notification.pivot.type == 1 ? 'has liked your Post' : 
             notification.pivot.type == 2 ? 'has followed you' : 
             notification.pivot.type == 3 ? 'has bookmarked your post' :
             'has commented on your Post'
-          }</p>
+          }
+          </p>
         </div>
+        </Link>
       </div>)
     }))}
     />
@@ -108,7 +102,7 @@ const Header = () => {
             </Dropdown>
             </div>
             <div className="md:float-right align-middle mt-3 mx-4 text-white ml-3">
-              <Dropdown overlay={received} placement="bottomRight" arrow>
+              <Dropdown overlay={received} placement="bottomRight" arrow trigger='click'>
                 <BellOutlined style={{fontSize: '2rem'}} className='cursor-pointer text-white'/>
               </Dropdown>
             </div>

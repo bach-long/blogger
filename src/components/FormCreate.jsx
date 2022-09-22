@@ -92,7 +92,7 @@ const FormCreate = ({articleId, userId}) => {
     <div>
       <PlusOutlined />
       <div
-        style={{
+        styles={{
           marginTop: 8,
         }}
       >
@@ -189,7 +189,7 @@ const FormCreate = ({articleId, userId}) => {
               <Modal visible={previewVisible} title={previewTitle} footer={null} onCancel={handleCancel}>
                 <img
                   alt="example"
-                  style={{
+                  styles={{
                     width: '100%',
                   }}
                   src={previewImage}
@@ -204,7 +204,7 @@ const FormCreate = ({articleId, userId}) => {
             <div className='mb-4 xl:w-auto'>
               <Select
                 placeholder='select category'
-                style={{
+                styles={{
                   width: 120,
                 }}
                 onChange={

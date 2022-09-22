@@ -3,11 +3,16 @@ import moment from 'moment'
 import { Link } from 'react-router-dom'
 import Bookmark from './Buttons/Bookmark'
 import { LayoutContext } from '../context/LayoutProvider'
-import {EyeFilled, BookFilled, CommentOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import {EyeFilled, BookFilled, CommentOutlined, EditOutlined, DeleteOutlined, RedoOutlined } from '@ant-design/icons';
 import Edit from './Buttons/Edit'
+import { Tooltip } from 'antd'
+import Delete from './Buttons/Delete'
+import { softDeleteArticle, restore } from '../api/articleApi'
+import { useNavigate } from 'react-router-dom'
 
-const Postcard = ({article}) => {
+const Postcard = ({article, deleted, list, setList, deleteList, setDeleteList}) => {
   const {mainUser} = React.useContext(LayoutContext);
+  const navigate = useNavigate();
 
   return (
     <div className='bg-white shadow-lg rounded-lg p-0 lg:p-8 pb-12 mb-8'>
@@ -16,8 +21,8 @@ const Postcard = ({article}) => {
         className='object-top absolute h-80 w-full object-cover shadow-lg rounded-t-lg lg:rounded-lg'/>
       </div>
       <div className="flex items-center justify-center mb-8 w-full">
-        <div className="md:flex items-center lg:mb-0 lg:w-auto mr-8 items-center">
-          <div className='flex items-center text-2xl ml-4'>
+        <div className="md:flex items-center lg:mb-0 lg:w-auto items-center">
+          <div className='flex items-center text-2xl'>
             <EyeFilled/>
             <span className='ml-2'>{article.view_count}</span>
           </div>
@@ -29,24 +34,39 @@ const Postcard = ({article}) => {
             <CommentOutlined/>
             <span className='ml-2'>{article.comments.length}</span>
           </div>
-          {mainUser.id == article.author.id &&
+          {mainUser.id == article.author.id && !deleted &&
            <Edit articleId ={article.id} userId={mainUser.id}/>
           }
-          {mainUser.id == article.author.id &&
-          <div className='flex items-center text-2xl ml-4 mb-2'>
-            <Link to={`/`} className='text-black hover:text-teal-400'>
-              <DeleteOutlined/>
-            </Link>
-          </div>
+          {mainUser.id == article.author.id && !deleted &&
+            <div onClick={async ()=>{
+              await softDeleteArticle(article.id);
+              if(setDeleteList) {
+                let copy = list.data.filter(item => item.id !== article.id);
+                let copy1 = [article, ...deleteList.data]
+                setList((prev)=>({...prev, data: copy}));
+                setDeleteList((prev)=>({...prev, data: copy1})) 
+              } else {
+                navigate(`/user/${mainUser.id}`, {state: {item: 'deleted'}})
+              }
+            }}>
+            <Delete />
+            </div>
           }
         </div>
       </div>
+      {!deleted ? 
       <Link to={`/detail/${article.id}`} className='inline-block flex justify-center'>
       <h1 className='inline align-middle transition duration-700 mb-8 cursor-pointer 
         hover:text-teal-400 text-3xl font-semibold inline-block'>
           {article.title}
       </h1>
-      </Link>
+      </Link> : 
+      <div className='inline-block flex justify-center'>
+        <h1 className='inline align-middle transition duration-700 mb-8 text-3xl font-semibold inline-block'>
+            {article.title}
+        </h1>
+      </div>
+      }
       <div className="block text-center items-center justify-center mb-8 w-full">
         <div className="flex items-center justify-center mb-4 lg:mb-0 w-full lg:w-auto items-center">
           <img
@@ -66,9 +86,23 @@ const Postcard = ({article}) => {
           <span className="align-middle">{moment(article.updated_at).format('MMM Do YYYY')}</span>
         </div>
       </div>
+      {!deleted ?
       <Link to={`/detail/${article.id}`} className='inline-block flex justify-center'>
         <span className="transition duration-500 ease transform hover:-translate-y-1 inline-block bg-teal-500 text-lg font-medium rounded-full text-white px-8 py-3 cursor-pointer">Continue Reading</span>
-      </Link>
+      </Link> : 
+      <div className='inline-block flex justify-center items-center mt-4'>
+        <Tooltip title='restore' placement='right'>
+          <RedoOutlined style={{fontSize: '3rem'}} className="text-black hover:text-teal-400 cursor-pointer" onClick={
+            async () => {
+              await restore(article.id);
+              let copy = list.data.filter(item => item.id !== article.id)
+              setList((prev)=>({...prev, data: copy}));
+              navigate(`/detail/${article.id}`)
+            }
+          }/>
+        </Tooltip>
+      </div>
+      }
     </div>
   )
 }

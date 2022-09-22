@@ -1,12 +1,11 @@
 import ky from "ky";
 
-export const notify = async (receiverId, type) => {
+export const notify = async (receiverId, type, articleId) => {
     try {
         const res = await ky.post(`http://127.0.0.1:8000/api/notification/send`,{
             headers: {'Authorization': `Bearer ${localStorage.getItem('token')}`},
-            json: {'receiverId': receiverId, 'type': type}
+            json: {'receiverId': receiverId, 'type': type, 'articleId': articleId}
         }).json();
-        console.log(res);
         return res;
     } catch (error) {
         return {
@@ -21,7 +20,6 @@ export const getAll = async () => {
         const res = await ky.get(`http://127.0.0.1:8000/api/notification/all`,{
             headers: {'Authorization': `Bearer ${localStorage.getItem('token')}`}
         }).json();
-        console.log(res);
         return res;
     } catch (error) {
         return {

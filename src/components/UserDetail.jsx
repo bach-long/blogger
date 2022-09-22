@@ -1,27 +1,32 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import { Menu } from 'antd';
-import { ProfileOutlined, PictureOutlined, BookOutlined, FileTextOutlined, BarChartOutlined } from '@ant-design/icons';
-import { getArticlesOfUser, getBookmark, getInfo, getStatistic } from '../api/userApi';
+import { ProfileOutlined, PictureOutlined, BookOutlined, FileTextOutlined, BarChartOutlined, DeleteOutlined, PlusSquareFilled } from '@ant-design/icons';
+import { getArticlesOfUser, getBookmark, getInfo, getSoftDeletedArticles, getStatistic } from '../api/userApi';
 import { Spin } from 'antd';
 import Info from './Info';
 import Paginate from './Paginate';
 import Postcard from './Postcard';
 import Chart from './Chart';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import PeopleList from './PeopleList';
 import Images from './Images';
 import { LayoutContext } from '../context/LayoutProvider';
 import Follow from './Buttons/Follow';
+import { Link } from 'react-router-dom';
 
 const UserDetail = () => {
+  const location = useLocation();
+
   const [articles, setArticles] = useState();
-  const [bookmark, setBookmark] = useState()
+  const [bookmark, setBookmark] = useState();
+  const [trash, setTrash] = useState();
   const [info, setInfo] = useState();
   const [articlePage, setArticlePage] = useState(1);
   const [bookmarkPage, setBookmarkPage] = useState(1);
+  const [trashPage, setTrashPage] = useState(1)
   const [statistic, setStatistic] = useState();
-  const [item, setItem] = useState('info');
+  const [item, setItem] = useState(location.state?.item ? location.state.item : 'info');
   const {mainUser} = React.useContext(LayoutContext);
 
   const params = useParams();
@@ -33,14 +38,15 @@ const UserDetail = () => {
       let res1 = await getBookmark(params.id);
       let res2 = await getInfo(params.id);
       let res3 = await getStatistic(params.id);
+      let res4 = await getSoftDeletedArticles(params.id);
       setInfo(res2.data);
       setArticles(res.data);
       setBookmark(res1.data);
       setStatistic(res3.data);
+      setTrash(res4.data);
     }
     getData();
-  }, [params.id])
-
+  }, [params.id]);
   const handleChangeArticlePage = async (page) => {
     let res;
     res = await getArticlesOfUser(params.id, page)
@@ -61,7 +67,15 @@ const UserDetail = () => {
     }
   }
 
-  console.log(info);
+  const handleChangeTrashPage = async (page) => {
+    let res;
+    res = await getArticlesOfUser(params.id, page)
+
+    if (res) {
+        setTrash(res.data)
+        setTrashPage(page)
+    }
+  }
 
   return (
     <div className='container mx-auto bx-10 mb-8'>
@@ -83,7 +97,7 @@ const UserDetail = () => {
                 }
             </div>
             <div className={`mt-4`}>
-            <Menu mode="horizontal" defaultSelectedKeys={['info']}
+            <Menu mode="horizontal" defaultSelectedKeys={[item]}
               onClick={({items, key, keyPath, domEvent})=>{
                 setItem(key);
               }}
@@ -94,12 +108,19 @@ const UserDetail = () => {
               <Menu.Item key="articles" icon={<FileTextOutlined />}>
                 <span>Articles</span>
               </Menu.Item>
-              <Menu.Item key="images" icon={<PictureOutlined />}>
-                <span>Images</span> 
-              </Menu.Item>
               <Menu.Item key="bookmark" icon={<BookOutlined />}>
                 <span>Bookmark</span>
               </Menu.Item>
+              {mainUser.id == info?.id &&
+              <Menu.Item key="deleted" icon={<DeleteOutlined />}>
+                <span>Deleted</span>
+              </Menu.Item>
+              }
+              {mainUser.id == info?.id &&
+              <Menu.Item key="images" icon={<PictureOutlined />}>
+                <span>Images</span> 
+              </Menu.Item>
+              }
               <Menu.Item key="statistic" icon={<BarChartOutlined/>}>
                 <span>Statistic</span>
               </Menu.Item>
@@ -115,15 +136,23 @@ const UserDetail = () => {
               {
                 (()=>{
                   if(info && articles && bookmark && statistic) {
-                    if(item=='info') {
+                    if(item == 'info') {
                       return (
                         <Info info={info}/>
                       )
                     } else if (item=='articles') {
                       return (
                         <div>
+                          <div className='flex justify-end'>
+                            <Link to='/create'>
+                            <div className='cursor-pointer hover:text-gray-500 text-gray-400 text-2xl mb-4'>
+                              <PlusSquareFilled/>
+                            </div>
+                            </Link>
+                          </div>
                           {articles.data.map((article)=>(
-                            <Postcard article={article} key={article.id}/>
+                            <Postcard article={article} key={article.id} list={articles} setList={setArticles} 
+                            deleteList={trash} setDeleteList={setTrash}/>
                           ))}
                           {articles.total > 6 && <Paginate page={articlePage} total={articles.total} onChange={handleChangeArticlePage}/>}
                         </div>
@@ -132,7 +161,8 @@ const UserDetail = () => {
                       return (
                         <div>
                           {bookmark.data.map((article)=>(
-                            <Postcard article={article} key={article.id}/>
+                            <Postcard article={article} key={article.id} list={bookmark} setList={setBookmark}
+                            deleteList={trash} setDeleteList={setTrash}/>
                           ))}
                           {bookmark.total > 6 && <Paginate page={bookmarkPage} total={bookmark.total} onChange={handleChangeBookmarkPage}/>}
                         </div>
@@ -152,9 +182,18 @@ const UserDetail = () => {
                       return(
                         <PeopleList list={info.followers} userId={info.id}/>
                       )
-                    } else {
+                    } else if (item == 'images'){
                       return <Images list={info.images}/>
-                    } 
+                    } else {
+                      return (
+                        <div>
+                          {trash.data.map((article)=>(
+                            <Postcard article={article} key={article.id} deleted={true} list={trash} setList={setTrash}/>
+                          ))}
+                          {trash.total > 6 && <Paginate page={trashPage} total={trash.total} onChange={handleChangeTrashPage}/>}
+                        </div>
+                      )
+                    }
                   } else {
                     return (
                       <div className='flex justify-center'>

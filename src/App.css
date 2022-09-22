@@ -19,6 +19,11 @@
   }
 }
 
+.ant-dropdown-menu {
+  max-height: 250px;
+  overflow: auto;
+}
+
 .ant-image-preview-img-wrapper{
   display: flex;
   justify-content: center;
